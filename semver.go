@@ -7,35 +7,36 @@ import (
     "strconv"
     "fmt"
 )
-
+const finalSemverPos = 2
 func buildSemver(numbers []string) (string) {
     return fmt.Sprintf("%s.%s.%s", numbers[0], numbers[1], numbers[2])
 }
 
 func incrementVersion(semver string, pos int) (string, error){
-    numberRegex, _ := regexp.Compile("[1-9]*")
-    err := Validate(semver)
-    if (err != nil) {
-        return "", err
+    numberRegex, _ := regexp.Compile("[0-9]*")
+    valid := Validate(semver)
+    if (!valid) {
+        return "", errors.New("Invalid semver: " + semver);
     }
     matches := numberRegex.FindAllString(semver, -1)
     num, _ := strconv.Atoi(matches[pos])
     num++;
     matches[pos] = strconv.Itoa(num)
+    pos++;
+    for pos <= finalSemverPos {
+        matches[pos] = "0"
+        pos++;
+     }
 
     res := buildSemver(matches)
     return res, nil
 }
 
-func Validate(semver string) (error) {
-    regex, _ := regexp.Compile("^[1-9]*\\.[1-9]*\\.[1-9]*$")
+func Validate(semver string) (bool) {
+    regex, _ := regexp.Compile("^[0-9]*\\.[0-9]*\\.[0-9]*$")
     semver = strings.TrimSpace(semver)
     match := regex.FindString(semver)
-    if (len(match) == 0) {
-        return errors.New("Invalid semver: " + semver);
-    } else {
-        return nil
-    }
+    return strings.Compare(match, semver) == 0
 }
 
 func BumpMajor(semver string) (string, error) {

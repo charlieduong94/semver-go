@@ -6,44 +6,54 @@ import (
     "fmt"
 )
 
-func printValidateResults(testName string, input string, expected bool, actual error) {
+func printValidateResults(testName string, input string, expected bool, actual bool) {
     fmt.Printf("Test Name: %s\n", testName)
     fmt.Printf("input: %s\n", input)
     fmt.Printf("expected : %v\n", expected)
-    fmt.Printf("valid: %v\n\n", actual == nil)
+    fmt.Printf("valid: %v\n\n", actual)
 }
 
 func printBumpResults(testName string, input string, expected string, actual string) {
     fmt.Printf("Test Name: %s\n", testName)
     fmt.Printf("input: %s\n", input)
     fmt.Printf("expected : %s\n", expected)
-    fmt.Printf("valid: %s\n\n", actual)
+    fmt.Printf("actual: %s\n\n", actual)
 }
 
-func TestValidateSemver(t *testing.T) {
+func TestValidSemver(t *testing.T) {
     input := "12.1.1"
     expected := true
-    actual := Validate(input)
-    printValidateResults("Test Validate Semver", input, expected, actual)
-    if (actual != nil) {
+    valid := Validate(input)
+    printValidateResults("Test Valid Semver", input, expected, valid)
+    if (!valid) {
         t.Fail()
     }
 }
 
 
-func TestValidateSemverFail(t *testing.T) {
+func TestInvalidSemver(t *testing.T) {
     input := "12.1.1.1"
     expected := false
-    actual := Validate(input)
-    printValidateResults("Test Validate Semver", input, expected, actual)
-    if (actual == nil) {
+    valid := Validate(input)
+    printValidateResults("Test Invalid Semver", input, expected, valid)
+    if (valid) {
+        t.Fail()
+    }
+}
+
+func TestAnotherInvalidSemver(t *testing.T) {
+    input := ".12.1.1"
+    expected := false
+    valid := Validate(input)
+    printValidateResults("Test Invalid Semver", input, expected, valid)
+    if (valid) {
         t.Fail()
     }
 }
 
 func TestBumpMajor(t *testing.T) {
     input := "12.1.1"
-    expected := "13.1.1"
+    expected := "13.0.0"
     actual, error := BumpMajor(input)
     printBumpResults("TestBumpMajor", input, expected, actual)
     if (error != nil || strings.Compare(expected, actual) != 0) {
@@ -53,7 +63,7 @@ func TestBumpMajor(t *testing.T) {
 
 func TestBumpMinor(t *testing.T) {
     input := "12.1.1"
-    expected := "12.2.1"
+    expected := "12.2.0"
     actual, error := BumpMinor(input)
     printBumpResults("TestBumpMinor", input, expected, actual)
     if (error != nil || strings.Compare(expected, actual) != 0) {
